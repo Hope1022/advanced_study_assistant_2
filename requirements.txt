@@ -1,0 +1,5 @@
+langchain==0.3.x
+langchain-community==0.3.x
+langchain-chroma==0.2.x
+langchain-ollama==0.3.x
+chromadb==0.5.x
