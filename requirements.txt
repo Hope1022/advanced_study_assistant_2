@@ -1,0 +1,10 @@
+langchain
+langchain-community
+langchain-chroma
+langchain-ollama
+chromadb
+fastapi
+pdfplumber
+langchain_chroma
+langchain_experimental
+flashrank
