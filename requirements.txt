@@ -4,7 +4,10 @@ langchain-chroma
 langchain-ollama
 chromadb
 fastapi
+email-validator
+python-jose[cryptography]
 pdfplumber
 langchain_chroma
 langchain_experimental
 flashrank
+uvicorn
