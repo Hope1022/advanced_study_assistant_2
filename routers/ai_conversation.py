@@ -9,6 +9,7 @@ from schemas.ai import (
     MessageResponseSchema,
 )
 from services import ai_conversation as conversation_service
+from core.dependency import get_current_user
 
 router = APIRouter(
     prefix="/conversations",
@@ -23,10 +24,11 @@ router = APIRouter(
 )
 async def create_conversation(
     data: ConversationCreateSchema,
+    user_id: int = Depends(get_current_user),
     db: asyncpg.Connection = Depends(get_db),
 ):
     return await conversation_service.create_conversation(
-        user_id=1,
+        user_id=user_id,
         title=data.title,
         db=db,
     )
@@ -38,10 +40,11 @@ async def create_conversation(
     status_code=status.HTTP_200_OK,
 )
 async def get_conversations(
+    user_id: int = Depends(get_current_user),
     db: asyncpg.Connection = Depends(get_db),
 ):
     return await conversation_service.get_conversations(
-        user_id=1,
+        user_id=user_id,
         db=db,
     )
 
@@ -52,11 +55,12 @@ async def get_conversations(
 )
 async def delete_conversation(
     conversation_id: int,
+    user_id: int = Depends(get_current_user),
     db: asyncpg.Connection = Depends(get_db),
 ):
     deleted = await conversation_service.delete_conversation(
         conversation_id=conversation_id,
-        user_id=1,
+        user_id=user_id,
         db=db,
     )
 
@@ -76,11 +80,12 @@ async def delete_conversation(
 )
 async def get_messages(
     conversation_id: int,
+    user_id: int = Depends(get_current_user),
     db: asyncpg.Connection = Depends(get_db),
 ):
     messages = await conversation_service.get_messages(
         conversation_id=conversation_id,
-        user_id=1,
+        user_id=user_id,
         db=db,
     )
 
@@ -101,11 +106,12 @@ async def get_messages(
 async def create_message(
     conversation_id: int,
     data: MessageCreateSchema,
+    user_id: int = Depends(get_current_user),
     db: asyncpg.Connection = Depends(get_db),
 ):
     message = await conversation_service.create_message(
         conversation_id=conversation_id,
-        user_id=1,
+        user_id=user_id,
         content=data.content,
         db=db,
     )

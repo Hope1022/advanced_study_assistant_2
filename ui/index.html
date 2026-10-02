@@ -35,7 +35,7 @@
 
         .app {
             width: 100%;
-            max-width: 720px;
+            max-width: 980px;
             height: 90vh;
             display: flex;
             flex-direction: column;
@@ -290,6 +290,108 @@
         }
         .app { min-height: 520px; }
 
+        .workspace {
+            flex: 1;
+            min-height: 0;
+            display: none;
+        }
+
+        .conversation-sidebar {
+            width: 225px;
+            flex: 0 0 225px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--grey-border);
+            background: #fbfcfb;
+        }
+
+        .sidebar-heading {
+            min-height: 58px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            border-bottom: 1px solid var(--grey-border);
+        }
+
+        .sidebar-heading h2 {
+            color: var(--text-dark);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .new-chat-btn {
+            width: auto;
+            height: 32px;
+            padding: 0 9px;
+            gap: 5px;
+            border-radius: 5px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .new-chat-btn svg { width: 15px; height: 15px; }
+
+        .conversation-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .conversation-row {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            margin-bottom: 3px;
+        }
+
+        .conversation-select, .conversation-delete {
+            height: 38px;
+            border-radius: 5px;
+            background: transparent;
+            color: var(--text-dark);
+        }
+
+        .conversation-select {
+            min-width: 0;
+            flex: 1;
+            justify-content: flex-start;
+            padding: 0 9px;
+            overflow: hidden;
+            font-size: 12px;
+            text-align: left;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .conversation-select:hover, .conversation-select[aria-current="true"] {
+            background: var(--green-pale);
+        }
+
+        .conversation-delete {
+            width: 32px;
+            flex: 0 0 32px;
+            color: var(--text-muted);
+        }
+
+        .conversation-delete:hover { background: #f8e8e6; color: #9b342b; }
+        .conversation-delete svg { width: 15px; height: 15px; stroke: currentColor; }
+
+        .conversation-empty {
+            padding: 12px 10px;
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .chat-panel {
+            min-width: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
         .account-controls {
             display: flex;
             align-items: center;
@@ -420,6 +522,7 @@
         }
 
         .app.authenticated .auth-view { display: none; }
+        .app.authenticated .workspace { display: flex; }
         .app.authenticated .chat { display: flex; }
         .app.authenticated .input-area { display: flex; }
         .chat, .input-area { display: none; }
@@ -431,6 +534,26 @@
             .account-controls { gap: 8px; }
             .account-email { max-width: 90px; }
             .auth-view { padding: 28px 22px; }
+            .workspace { flex-direction: column; }
+            .conversation-sidebar {
+                width: 100%;
+                flex: 0 0 auto;
+                border-right: 0;
+                border-bottom: 1px solid var(--grey-border);
+            }
+            .sidebar-heading { min-height: 48px; padding: 8px 12px; }
+            .conversation-list {
+                display: flex;
+                gap: 4px;
+                max-height: 54px;
+                overflow-x: auto;
+                overflow-y: hidden;
+                padding: 5px 8px;
+            }
+            .conversation-row { flex: 0 0 180px; margin: 0; }
+            .conversation-empty { padding: 7px 5px; white-space: nowrap; }
+            .chat { padding: 18px 14px; }
+            .input-area { padding: 12px; }
         }
     </style>
 </head>
@@ -480,22 +603,35 @@
         </div>
     </section>
 
-    <div class="chat" id="chat">
-        <div class="welcome">
-            <div class="welcome-leaf">🌱</div>
-            <h2>Ready to learn</h2>
-            <p>Ask any question from your Grade 9 Biology textbook and I will explain it clearly.</p>
-        </div>
-    </div>
-
-    <div class="input-area">
-        <input type="text" id="input" placeholder="Ask a biology question..." autocomplete="off"/>
-        <button id="send-btn" onclick="ask()">
-            <svg viewBox="0 0 24 24">
-                <line x1="22" y1="2" x2="11" y2="13"/>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-        </button>
+    <div class="workspace">
+        <aside class="conversation-sidebar" aria-label="Saved conversations">
+            <div class="sidebar-heading">
+                <h2>Conversations</h2>
+                <button class="new-chat-btn" id="new-chat-btn" type="button" title="Start a new conversation">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    New chat
+                </button>
+            </div>
+            <div class="conversation-list" id="conversation-list" aria-live="polite"></div>
+        </aside>
+        <main class="chat-panel">
+            <div class="chat" id="chat">
+                <div class="welcome">
+                    <div class="welcome-leaf">🌱</div>
+                    <h2>Ready to learn</h2>
+                    <p>Ask any question from your Grade 9 Biology textbook and I will explain it clearly.</p>
+                </div>
+            </div>
+            <div class="input-area">
+                <input type="text" id="input" placeholder="Ask a biology question..." autocomplete="off"/>
+                <button id="send-btn" type="button" aria-label="Send message" title="Send message">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                </button>
+            </div>
+        </main>
     </div>
 
 </div>
@@ -514,6 +650,8 @@
     const authSubmit = document.getElementById("auth-submit")
     const accountControls = document.getElementById("account-controls")
     const accountEmail = document.getElementById("account-email")
+    const conversationList = document.getElementById("conversation-list")
+    let currentConversationId = null
     let authMode = "login"
 
     function saveTokens(tokens) {
@@ -525,7 +663,10 @@
         app.classList.toggle("authenticated", signedIn)
         accountControls.hidden = !signedIn
         accountEmail.textContent = email || "Signed in"
-        if (signedIn) input.focus()
+        if (signedIn) {
+            input.focus()
+            loadConversations()
+        }
     }
 
     function setAuthMode(mode) {
@@ -632,6 +773,8 @@
         sessionStorage.removeItem("access_token")
         sessionStorage.removeItem("refresh_token")
         sessionStorage.removeItem("account_email")
+        currentConversationId = null
+        conversationList.replaceChildren()
         chat.innerHTML = `<div class="welcome"><div class="welcome-leaf">🌱</div><h2>Ready to learn</h2><p>Ask any question from your Grade 9 Biology textbook and I will explain it clearly.</p></div>`
         setSignedIn(false)
     })
@@ -640,6 +783,95 @@
     if (savedAccessToken) {
         setSignedIn(true, sessionStorage.getItem("account_email"))
     }
+
+    function showWelcome() {
+        chat.innerHTML = `<div class="welcome"><div class="welcome-leaf">🌱</div><h2>Ready to learn</h2><p>Ask any question from your Grade 9 Biology textbook and I will explain it clearly.</p></div>`
+    }
+
+    function renderConversations(conversations) {
+        conversationList.replaceChildren()
+        if (!conversations.length) {
+            const empty = document.createElement("p")
+            empty.className = "conversation-empty"
+            empty.textContent = "Your saved conversations will appear here."
+            conversationList.appendChild(empty)
+            return
+        }
+
+        conversations.forEach(conversation => {
+            const row = document.createElement("div")
+            row.className = "conversation-row"
+
+            const select = document.createElement("button")
+            select.type = "button"
+            select.className = "conversation-select"
+            select.textContent = conversation.title || "Biology conversation"
+            select.title = select.textContent
+            select.setAttribute("aria-current", String(conversation.id === currentConversationId))
+            select.addEventListener("click", () => openConversation(conversation.id))
+
+            const remove = document.createElement("button")
+            remove.type = "button"
+            remove.className = "conversation-delete"
+            remove.title = "Delete conversation"
+            remove.setAttribute("aria-label", `Delete ${select.textContent}`)
+            remove.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"/></svg>`
+            remove.addEventListener("click", () => deleteConversation(conversation.id))
+
+            row.append(select, remove)
+            conversationList.appendChild(row)
+        })
+    }
+
+    async function loadConversations() {
+        try {
+            const response = await fetchWithAuth("/conversations")
+            if (!response.ok) throw new Error(await responseMessage(response))
+            const conversations = await response.json()
+            renderConversations(conversations)
+        } catch (error) {
+            conversationList.replaceChildren()
+            const message = document.createElement("p")
+            message.className = "conversation-empty"
+            message.textContent = error.message || "Could not load conversations."
+            conversationList.appendChild(message)
+        }
+    }
+
+    async function openConversation(conversationId) {
+        try {
+            const response = await fetchWithAuth(`/conversations/${conversationId}/messages`)
+            if (!response.ok) throw new Error(await responseMessage(response))
+            const messages = await response.json()
+            currentConversationId = conversationId
+            showWelcome()
+            messages.forEach(message => addMessage(message.content, message.role === "user" ? "user" : "bot"))
+            await loadConversations()
+        } catch (error) {
+            addMessage(error.message || "Could not load this conversation.", "bot")
+        }
+    }
+
+    async function deleteConversation(conversationId) {
+        try {
+            const response = await fetchWithAuth(`/conversations/${conversationId}`, { method: "DELETE" })
+            if (!response.ok) throw new Error(await responseMessage(response))
+            if (currentConversationId === conversationId) {
+                currentConversationId = null
+                showWelcome()
+            }
+            await loadConversations()
+        } catch (error) {
+            addMessage(error.message || "Could not delete this conversation.", "bot")
+        }
+    }
+
+    document.getElementById("new-chat-btn").addEventListener("click", () => {
+        currentConversationId = null
+        showWelcome()
+        loadConversations()
+        input.focus()
+    })
 
     function addMessage(text, role) {
         const welcome = document.querySelector(".welcome")
@@ -689,7 +921,7 @@
 
     async function ask() {
         const question = input.value.trim()
-        if (!question) return
+        if (!question || sendBtn.disabled) return
 
         addMessage(question, "user")
         input.value   = ""
@@ -699,15 +931,27 @@
         showThinking()
 
         try {
-            const res  = await fetchWithAuth("/ask", {
+            if (currentConversationId === null) {
+                const created = await fetchWithAuth("/conversations", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title: question.slice(0, 80) })
+                })
+                if (!created.ok) throw new Error(await responseMessage(created))
+                const conversation = await created.json()
+                currentConversationId = conversation.id
+                await loadConversations()
+            }
+
+            const res = await fetchWithAuth(`/conversations/${currentConversationId}/messages`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ question })
+                body: JSON.stringify({ content: question })
             })
             if (!res.ok) throw new Error(await responseMessage(res))
             const data = await res.json()
             removeThinking()
-            addMessage(data.answer || "I couldn't get an answer. Please try again.", "bot")
+            addMessage(data.content || "I couldn't get an answer. Please try again.", "bot")
         } catch (error) {
             removeThinking()
             addMessage(error.message || "Something went wrong. Please try again.", "bot")
@@ -721,6 +965,7 @@
     input.addEventListener("keydown", e => {
         if (e.key === "Enter") ask()
     })
+    sendBtn.addEventListener("click", ask)
 </script>
 </body>
 </html>
