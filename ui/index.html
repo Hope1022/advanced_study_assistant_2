@@ -288,6 +288,150 @@
             cursor: not-allowed;
             transform: none;
         }
+        .app { min-height: 520px; }
+
+        .account-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: auto;
+        }
+
+        .account-email {
+            max-width: 180px;
+            overflow: hidden;
+            color: var(--green-pale);
+            font-size: 12px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .logout-btn, .auth-mode button, .auth-submit {
+            width: auto;
+            height: auto;
+            border-radius: 6px;
+            font: inherit;
+        }
+
+        .logout-btn {
+            padding: 8px 11px;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            background: transparent;
+            font-size: 12px;
+        }
+
+        .logout-btn:hover { background: rgba(255, 255, 255, 0.12); }
+
+        .auth-view {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            overflow-y: auto;
+            padding: 32px 24px;
+        }
+
+        .auth-content { width: 100%; max-width: 380px; }
+        .auth-eyebrow {
+            margin-bottom: 10px;
+            color: var(--green-mid);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+        }
+
+        .auth-content h2 {
+            color: var(--green-deep);
+            font-size: 24px;
+            line-height: 1.25;
+        }
+
+        .auth-copy {
+            margin-top: 8px;
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .auth-mode {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            margin: 24px 0 18px;
+            padding: 4px;
+            border: 1px solid var(--grey-border);
+            border-radius: 7px;
+            background: var(--grey-soft);
+        }
+
+        .auth-mode button {
+            min-height: 38px;
+            padding: 8px 12px;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .auth-mode button:hover { background: rgba(255, 255, 255, 0.7); }
+        .auth-mode button[aria-selected="true"] {
+            background: var(--white);
+            color: var(--green-deep);
+            box-shadow: 0 1px 4px rgba(26, 46, 31, 0.12);
+        }
+
+        .auth-form { display: grid; gap: 14px; }
+        .auth-form label {
+            display: grid;
+            gap: 6px;
+            color: var(--text-dark);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .auth-form input {
+            width: 100%;
+            min-height: 43px;
+            padding: 10px 12px;
+            border: 1px solid var(--grey-border);
+            border-radius: 5px;
+            outline: none;
+            background: var(--white);
+            color: var(--text-dark);
+            font: 14px 'Inter', sans-serif;
+        }
+
+        .auth-form input:focus { border-color: var(--green-mid); }
+        .auth-form input::placeholder { color: #87978d; }
+
+        .auth-submit {
+            width: 100%;
+            min-height: 44px;
+            margin-top: 3px;
+            border-radius: 5px;
+            background: var(--green-deep);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .auth-message {
+            min-height: 20px;
+            color: #a33232;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .app.authenticated .auth-view { display: none; }
+        .app.authenticated .chat { display: flex; }
+        .app.authenticated .input-area { display: flex; }
+        .chat, .input-area { display: none; }
+
+        @media (max-width: 520px) {
+            body { min-height: 100vh; height: auto; padding: 0; }
+            .app { min-height: 100vh; height: 100vh; border-radius: 0; }
+            .header { padding: 14px 16px; }
+            .account-controls { gap: 8px; }
+            .account-email { max-width: 90px; }
+            .auth-view { padding: 28px 22px; }
+        }
     </style>
 </head>
 <body>
@@ -300,7 +444,41 @@
             <p>Grade 9 · Powered by AI</p>
         </div>
         <div class="status-dot"></div>
+        <div class="account-controls" id="account-controls" hidden>
+            <span class="account-email" id="account-email"></span>
+            <button class="logout-btn" id="logout-btn" type="button">Sign out</button>
+        </div>
     </div>
+
+    <section class="auth-view" id="auth-view" aria-labelledby="auth-title">
+        <div class="auth-content">
+            <p class="auth-eyebrow">GRADE 9 BIOLOGY</p>
+            <h2 id="auth-title">Welcome back</h2>
+            <p class="auth-copy" id="auth-copy">Sign in to continue learning with your biology tutor.</p>
+
+            <div class="auth-mode" role="tablist" aria-label="Account access">
+                <button id="login-mode" type="button" role="tab" aria-selected="true">Sign in</button>
+                <button id="register-mode" type="button" role="tab" aria-selected="false">Create account</button>
+            </div>
+
+            <form class="auth-form" id="auth-form">
+                <label id="full-name-row" hidden>
+                    Full name
+                    <input id="full-name" name="full_name" type="text" autocomplete="name" minlength="2" maxlength="100" placeholder="Your name">
+                </label>
+                <label>
+                    Email
+                    <input id="email" name="email" type="email" autocomplete="username" required placeholder="you@example.com">
+                </label>
+                <label>
+                    Password
+                    <input id="password" name="password" type="password" autocomplete="current-password" required placeholder="At least 8 characters">
+                </label>
+                <button class="auth-submit" id="auth-submit" type="submit">Sign in</button>
+                <p class="auth-message" id="auth-message" role="alert" aria-live="polite"></p>
+            </form>
+        </div>
+    </section>
 
     <div class="chat" id="chat">
         <div class="welcome">
@@ -323,9 +501,145 @@
 </div>
 
 <script>
+    const app = document.querySelector(".app")
     const chat    = document.getElementById("chat")
     const input   = document.getElementById("input")
     const sendBtn = document.getElementById("send-btn")
+    const authForm = document.getElementById("auth-form")
+    const authMessage = document.getElementById("auth-message")
+    const fullNameRow = document.getElementById("full-name-row")
+    const fullNameInput = document.getElementById("full-name")
+    const emailInput = document.getElementById("email")
+    const passwordInput = document.getElementById("password")
+    const authSubmit = document.getElementById("auth-submit")
+    const accountControls = document.getElementById("account-controls")
+    const accountEmail = document.getElementById("account-email")
+    let authMode = "login"
+
+    function saveTokens(tokens) {
+        sessionStorage.setItem("access_token", tokens.access_token)
+        sessionStorage.setItem("refresh_token", tokens.refresh_token)
+    }
+
+    function setSignedIn(signedIn, email = "") {
+        app.classList.toggle("authenticated", signedIn)
+        accountControls.hidden = !signedIn
+        accountEmail.textContent = email || "Signed in"
+        if (signedIn) input.focus()
+    }
+
+    function setAuthMode(mode) {
+        authMode = mode
+        const registering = mode === "register"
+        fullNameRow.hidden = !registering
+        fullNameInput.required = registering
+        passwordInput.autocomplete = registering ? "new-password" : "current-password"
+        document.getElementById("login-mode").setAttribute("aria-selected", String(!registering))
+        document.getElementById("register-mode").setAttribute("aria-selected", String(registering))
+        document.getElementById("auth-title").textContent = registering ? "Create your account" : "Welcome back"
+        document.getElementById("auth-copy").textContent = registering
+            ? "Set up an account to start learning with your biology tutor."
+            : "Sign in to continue learning with your biology tutor."
+        authSubmit.textContent = registering ? "Create account" : "Sign in"
+        authMessage.textContent = ""
+    }
+
+    async function responseMessage(response) {
+        const data = await response.json().catch(() => ({}))
+        if (Array.isArray(data.detail)) {
+            return data.detail.map(item => item.msg || "Invalid input").join(" ")
+        }
+        return data.detail || data.message || `Request failed (${response.status}).`
+    }
+
+    async function refreshAccessToken() {
+        const refreshToken = sessionStorage.getItem("refresh_token")
+        if (!refreshToken) return false
+
+        try {
+            const response = await fetch("/auth/refresh", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ refresh_token: refreshToken })
+            })
+            if (!response.ok) return false
+            saveTokens(await response.json())
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    async function fetchWithAuth(url, options = {}) {
+        const headers = new Headers(options.headers || {})
+        const accessToken = sessionStorage.getItem("access_token")
+        if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`)
+
+        let response = await fetch(url, { ...options, headers })
+        if (response.status === 401 && await refreshAccessToken()) {
+            headers.set("Authorization", `Bearer ${sessionStorage.getItem("access_token")}`)
+            response = await fetch(url, { ...options, headers })
+        }
+        return response
+    }
+
+    document.getElementById("login-mode").addEventListener("click", () => setAuthMode("login"))
+    document.getElementById("register-mode").addEventListener("click", () => setAuthMode("register"))
+
+    authForm.addEventListener("submit", async event => {
+        event.preventDefault()
+        authMessage.textContent = ""
+        authSubmit.disabled = true
+        authSubmit.textContent = authMode === "register" ? "Creating account..." : "Signing in..."
+
+        const credentials = {
+            email: emailInput.value.trim(),
+            password: passwordInput.value
+        }
+        if (authMode === "register") credentials.full_name = fullNameInput.value.trim()
+
+        try {
+            const response = await fetch(`/auth/${authMode === "register" ? "register" : "login"}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(credentials)
+            })
+            if (!response.ok) throw new Error(await responseMessage(response))
+
+            saveTokens(await response.json())
+            sessionStorage.setItem("account_email", credentials.email)
+            passwordInput.value = ""
+            setSignedIn(true, credentials.email)
+        } catch (error) {
+            authMessage.textContent = error.message || "Could not connect. Please try again."
+        } finally {
+            authSubmit.disabled = false
+            authSubmit.textContent = authMode === "register" ? "Create account" : "Sign in"
+        }
+    })
+
+    document.getElementById("logout-btn").addEventListener("click", async () => {
+        const refreshToken = sessionStorage.getItem("refresh_token")
+        if (refreshToken) {
+            try {
+                await fetch("/auth/logout", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ refresh_token: refreshToken })
+                })
+            } catch { /* Clear this browser session even if the server is unavailable. */ }
+        }
+        sessionStorage.removeItem("access_token")
+        sessionStorage.removeItem("refresh_token")
+        sessionStorage.removeItem("account_email")
+        chat.innerHTML = `<div class="welcome"><div class="welcome-leaf">🌱</div><h2>Ready to learn</h2><p>Ask any question from your Grade 9 Biology textbook and I will explain it clearly.</p></div>`
+        setSignedIn(false)
+    })
+
+    const savedAccessToken = sessionStorage.getItem("access_token")
+    if (savedAccessToken) {
+        setSignedIn(true, sessionStorage.getItem("account_email"))
+    }
 
     function addMessage(text, role) {
         const welcome = document.querySelector(".welcome")
@@ -385,17 +699,18 @@
         showThinking()
 
         try {
-            const res  = await fetch("/ask", {
+            const res  = await fetchWithAuth("/ask", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ question })
             })
+            if (!res.ok) throw new Error(await responseMessage(res))
             const data = await res.json()
             removeThinking()
-            addMessage(data.answer, "bot")
-        } catch (err) {
+            addMessage(data.answer || "I couldn't get an answer. Please try again.", "bot")
+        } catch (error) {
             removeThinking()
-            addMessage("Something went wrong. Please try again.", "bot")
+            addMessage(error.message || "Something went wrong. Please try again.", "bot")
         }
 
         input.disabled   = false
@@ -403,7 +718,7 @@
         input.focus()
     }
 
-    input.addEventListener("keypress", e => {
+    input.addEventListener("keydown", e => {
         if (e.key === "Enter") ask()
     })
 </script>

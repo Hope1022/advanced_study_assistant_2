@@ -93,19 +93,39 @@
 #     for r in results:
 #         context += r["text"] + "\n\n"
 #     return context
-    
+import os
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+from database.database import init_db
+from routers.auth import router as auth_router
+
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 # from ai.graph import app as rag_app
 from ai.lang import call_llm
+from database.database import init_pool, close_pool, init_db
 import sys
 import os
 from dotenv import load_dotenv
+from routers.ai_conversation import router as conversation_router
 load_dotenv()
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "ai"))
 
-app = FastAPI()
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "ai"))
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_pool()   # open the pool
+    await init_db()     # create tables if they don't exist
+    yield
+    await close_pool()  # shut the pool down cleanly when app stops
+app = FastAPI(title="Student Assistant",
+    swagger_ui_parameters={"persistAuthorization": True},
+                           lifespan=lifespan)
+app.include_router(auth_router)
+app.include_router(conversation_router)
 
 class Query(BaseModel):
     question: str
@@ -126,3 +146,8 @@ os.environ["LANGSMITH_PROJECT"] = os.getenv("LANGSMITH_PROJECT", "")
 
 client = Client()
 print("Connected:", client.list_projects())
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="127.0.0.1", port=8000)

@@ -1,0 +1,119 @@
+from fastapi import APIRouter, Depends, status, HTTPException
+import asyncpg
+
+from database.database import get_db
+from schemas.ai import (
+    ConversationCreateSchema,
+    ConversationResponseSchema,
+    MessageCreateSchema,
+    MessageResponseSchema,
+)
+from services import ai_conversation as conversation_service
+
+router = APIRouter(
+    prefix="/conversations",
+    tags=["Conversations"],
+)
+
+
+@router.post(
+    "",
+    response_model=ConversationResponseSchema,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_conversation(
+    data: ConversationCreateSchema,
+    db: asyncpg.Connection = Depends(get_db),
+):
+    return await conversation_service.create_conversation(
+        user_id=1,
+        title=data.title,
+        db=db,
+    )
+
+
+@router.get(
+    "",
+    response_model=list[ConversationResponseSchema],
+    status_code=status.HTTP_200_OK,
+)
+async def get_conversations(
+    db: asyncpg.Connection = Depends(get_db),
+):
+    return await conversation_service.get_conversations(
+        user_id=1,
+        db=db,
+    )
+
+
+@router.delete(
+    "/{conversation_id}",
+    status_code=status.HTTP_200_OK,
+)
+async def delete_conversation(
+    conversation_id: int,
+    db: asyncpg.Connection = Depends(get_db),
+):
+    deleted = await conversation_service.delete_conversation(
+        conversation_id=conversation_id,
+        user_id=1,
+        db=db,
+    )
+
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Conversation not found",
+        )
+
+    return {"message": "Conversation deleted successfully"}
+
+
+@router.get(
+    "/{conversation_id}/messages",
+    response_model=list[MessageResponseSchema],
+    status_code=status.HTTP_200_OK,
+)
+async def get_messages(
+    conversation_id: int,
+    db: asyncpg.Connection = Depends(get_db),
+):
+    messages = await conversation_service.get_messages(
+        conversation_id=conversation_id,
+        user_id=1,
+        db=db,
+    )
+
+    if messages is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Conversation not found",
+        )
+
+    return messages
+
+
+@router.post(
+    "/{conversation_id}/messages",
+    response_model=MessageResponseSchema,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_message(
+    conversation_id: int,
+    data: MessageCreateSchema,
+    db: asyncpg.Connection = Depends(get_db),
+):
+    message = await conversation_service.create_message(
+        conversation_id=conversation_id,
+        user_id=1,
+        content=data.content,
+        db=db,
+    )
+
+    if message is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Conversation not found",
+        )
+
+    return message

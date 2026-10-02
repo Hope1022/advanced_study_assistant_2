@@ -32,7 +32,7 @@ Output HALLUCINATED if the user prompt contains anything not in the context and 
 Do not explain. Do not add punctuation. Output only one word."""),
     ("human", "{result}")
 ])
-question = "how are insects useful for our environment"
+# question = "how are insects useful for our environment"
 llm_chain = prompt_template|llm|StrOutputParser() 
 
 def call_llm(query):
