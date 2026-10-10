@@ -196,34 +196,6 @@
             border: 1px solid var(--grey-border);
         }
 
-        /* growing plant loading animation */
-        .thinking {
-            display: flex;
-            align-items: flex-end;
-            gap: 5px;
-            padding: 14px 16px;
-            background: var(--grey-soft);
-            border: 1px solid var(--grey-border);
-            border-radius: 14px;
-            border-bottom-left-radius: 4px;
-        }
-
-        .stem {
-            width: 3px;
-            border-radius: 3px;
-            background: var(--green-light);
-            animation: grow 1s ease-in-out infinite;
-        }
-
-        .stem:nth-child(1) { height: 8px;  animation-delay: 0s; }
-        .stem:nth-child(2) { height: 8px;  animation-delay: 0.15s; }
-        .stem:nth-child(3) { height: 8px;  animation-delay: 0.3s; }
-
-        @keyframes grow {
-            0%, 100% { height: 6px;  opacity: 0.4; background: var(--green-light); }
-            50%       { height: 18px; opacity: 1;   background: var(--green-deep); }
-        }
-
         /* input area */
         .input-area {
             padding: 16px 20px;
@@ -895,30 +867,6 @@
         return bubble
     }
 
-    function showThinking() {
-        const msg    = document.createElement("div")
-        msg.className = "message bot"
-        msg.id        = "thinking"
-
-        const avatar  = document.createElement("div")
-        avatar.className = "avatar"
-        avatar.textContent = "🌿"
-
-        const bubble  = document.createElement("div")
-        bubble.className = "thinking"
-        bubble.innerHTML = `<div class="stem"></div><div class="stem"></div><div class="stem"></div>`
-
-        msg.appendChild(avatar)
-        msg.appendChild(bubble)
-        chat.appendChild(msg)
-        chat.scrollTop = chat.scrollHeight
-    }
-
-    function removeThinking() {
-        const el = document.getElementById("thinking")
-        if (el) el.remove()
-    }
-
     async function ask() {
         const question = input.value.trim()
         if (!question || sendBtn.disabled) return
@@ -928,7 +876,7 @@
         input.disabled = true
         sendBtn.disabled = true
 
-        showThinking()
+        const responseBubble = addMessage("Starting...", "bot")
 
         try {
             if (currentConversationId === null) {
@@ -949,12 +897,44 @@
                 body: JSON.stringify({ content: question })
             })
             if (!res.ok) throw new Error(await responseMessage(res))
-            const data = await res.json()
-            removeThinking()
-            addMessage(data.content || "I couldn't get an answer. Please try again.", "bot")
+            const reader = res.body.getReader()
+            const decoder = new TextDecoder()
+            let answer = ""
+
+            const processEvent = frame => {
+                let eventType = "message"
+                const dataLines = []
+                for (const line of frame.split(/\r?\n/)) {
+                    if (line.startsWith("event:")) eventType = line.slice(6).trim()
+                    if (line.startsWith("data:")) dataLines.push(line.slice(5).trim())
+                }
+                if (!dataLines.length) return
+
+                const eventData = JSON.parse(dataLines.join("\n"))
+                if (eventType === "status") {
+                    responseBubble.textContent = eventData.content
+                } else if (eventType === "token") {
+                    answer += eventData.content
+                    responseBubble.textContent = answer
+                }
+                chat.scrollTop = chat.scrollHeight
+            }
+
+            let buffer = ""
+            while (true) {
+                const { value, done } = await reader.read()
+                buffer += decoder.decode(value || new Uint8Array(), { stream: !done })
+                let frameEnd
+                while ((frameEnd = buffer.indexOf("\n\n")) !== -1) {
+                    processEvent(buffer.slice(0, frameEnd))
+                    buffer = buffer.slice(frameEnd + 2)
+                }
+                if (done) break
+            }
+            if (buffer.trim()) processEvent(buffer)
+            responseBubble.textContent = answer || "I couldn't get an answer. Please try again."
         } catch (error) {
-            removeThinking()
-            addMessage(error.message || "Something went wrong. Please try again.", "bot")
+            responseBubble.textContent = error.message || "Something went wrong. Please try again."
         }
 
         input.disabled   = false

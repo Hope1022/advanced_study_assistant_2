@@ -101,11 +101,11 @@ from dotenv import load_dotenv
 from database.database import init_db
 from routers.auth import router as auth_router
 
-from fastapi import FastAPI
+
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 # from ai.graph import app as rag_app
-from ai.lang import call_llm
+#from ai.lang import call_llm
 from database.database import init_pool, close_pool, init_db
 import sys
 import os
@@ -134,10 +134,10 @@ class Query(BaseModel):
 def home():
     return FileResponse("ui/index.html")
 
-@app.post("/ask")
-def ask(query: Query):
-    result = call_llm(query.question)
-    return {"answer":result }
+# @app.post("/ask")
+# def ask(query: Query):
+#     result = call_llm(query.question)
+#     return {"answer":result }
 
 from langsmith import Client
 os.environ["LANGSMITH_TRACING"] = "true"
