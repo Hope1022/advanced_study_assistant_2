@@ -102,15 +102,16 @@ prompt = ChatPromptTemplate.from_messages([
     ("system", "Rewrite the user query into 3 specific sub-queries for document retrieval. Return only a numbered list, nothing else."),
     ("human", "{query}")
 ])
-
-def transform_and_retrieve(query: str) -> list:
-    # Step 1: transform
-    chain = prompt | llm | StrOutputParser()
-    result = chain.invoke({"query": query})
-    #print(result)
-    lines = [line.strip() for line in result.strip().split("\n") if line.strip()]
-    sub_queries = [line.split(". ", 1)[-1] for line in lines if line[0].isdigit()]
-    # return sub_queries
+def sub_querries(query: str):
+    
+        chain = prompt | llm | StrOutputParser()
+        result = chain.invoke({"query": query})
+        #print(result)
+        lines = [line.strip() for line in result.strip().split("\n") if line.strip()]
+        sub_queries = [line.split(". ", 1)[-1] for line in lines if line[0].isdigit()]
+        return sub_queries
+def transform_and_retrieve(sub_querie_) -> list:
+    sub_queries = sub_querries(sub_querie_)
     ensemble_retriever = EnsembleRetriever(
     retrievers=[bm25_retriever, vector_retriever],
     weights=[0.5, 0.5]

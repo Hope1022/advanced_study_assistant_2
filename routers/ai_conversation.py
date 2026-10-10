@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi.responses import StreamingResponse
 import asyncpg
 
 from database.database import get_db
@@ -100,7 +101,6 @@ async def get_messages(
 
 @router.post(
     "/{conversation_id}/messages",
-    response_model=MessageResponseSchema,
     status_code=status.HTTP_201_CREATED,
 )
 async def create_message(
@@ -122,4 +122,12 @@ async def create_message(
             detail="Conversation not found",
         )
 
-    return message
+    return StreamingResponse(
+        message,
+        media_type="text/event-stream",
+        status_code=status.HTTP_201_CREATED,
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )

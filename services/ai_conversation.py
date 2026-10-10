@@ -1,5 +1,8 @@
 import asyncpg
-from ai.lang import call_llm
+from collections.abc import AsyncIterator
+import json
+#from ai.lang import call_llm
+from ai.agents import run_agent
 
 async def create_conversation(
     user_id: int,
@@ -94,7 +97,7 @@ async def create_message(
     user_id: int,
     content: str,
     db: asyncpg.Connection,
-) -> dict:
+) -> AsyncIterator[str] | None:
 
     # check conversation belongs to this user
     conversation = await db.fetchrow(
@@ -121,15 +124,35 @@ async def create_message(
         "user",
         content,
     )
-    ai_response = call_llm(content)
-    message = message = await db.fetchrow(
+    previous = await db.fetch(
         """
-        INSERT INTO messages (conversation_id, role, content)
-        VALUES ($1, 'assistant', $2)
-        RETURNING id, conversation_id, role, content, created_at
+        SELECT role, content FROM messages
+        WHERE conversation_id = $1
+        ORDER BY created_at ASC
         """,
         conversation_id,
-        ai_response,
     )
 
-    return dict(message)
+    history = [dict(m) for m in previous]
+
+    async def stream_response() -> AsyncIterator[str]:
+        response_parts = []
+        async for event_type, event_content in run_agent(content, history):
+            if event_type == "token":
+                response_parts.append(event_content)
+            yield (
+                f"event: {event_type}\n"
+                f"data: {json.dumps({'content': event_content}, ensure_ascii=False)}\n\n"
+            )
+
+        await db.fetchrow(
+            """
+            INSERT INTO messages (conversation_id, role, content)
+            VALUES ($1, 'assistant', $2)
+            RETURNING id, conversation_id, role, content, created_at
+            """,
+            conversation_id,
+            "".join(response_parts),
+        )
+
+    return stream_response()
