@@ -35,7 +35,7 @@
 
         .app {
             width: 100%;
-            max-width: 980px;
+            max-width: 720px;
             height: 90vh;
             display: flex;
             flex-direction: column;
@@ -196,6 +196,34 @@
             border: 1px solid var(--grey-border);
         }
 
+        /* growing plant loading animation */
+        .thinking {
+            display: flex;
+            align-items: flex-end;
+            gap: 5px;
+            padding: 14px 16px;
+            background: var(--grey-soft);
+            border: 1px solid var(--grey-border);
+            border-radius: 14px;
+            border-bottom-left-radius: 4px;
+        }
+
+        .stem {
+            width: 3px;
+            border-radius: 3px;
+            background: var(--green-light);
+            animation: grow 1s ease-in-out infinite;
+        }
+
+        .stem:nth-child(1) { height: 8px;  animation-delay: 0s; }
+        .stem:nth-child(2) { height: 8px;  animation-delay: 0.15s; }
+        .stem:nth-child(3) { height: 8px;  animation-delay: 0.3s; }
+
+        @keyframes grow {
+            0%, 100% { height: 6px;  opacity: 0.4; background: var(--green-light); }
+            50%       { height: 18px; opacity: 1;   background: var(--green-deep); }
+        }
+
         /* input area */
         .input-area {
             padding: 16px 20px;
@@ -260,273 +288,6 @@
             cursor: not-allowed;
             transform: none;
         }
-        .app { min-height: 520px; }
-
-        .workspace {
-            flex: 1;
-            min-height: 0;
-            display: none;
-        }
-
-        .conversation-sidebar {
-            width: 225px;
-            flex: 0 0 225px;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid var(--grey-border);
-            background: #fbfcfb;
-        }
-
-        .sidebar-heading {
-            min-height: 58px;
-            padding: 12px 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            border-bottom: 1px solid var(--grey-border);
-        }
-
-        .sidebar-heading h2 {
-            color: var(--text-dark);
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .new-chat-btn {
-            width: auto;
-            height: 32px;
-            padding: 0 9px;
-            gap: 5px;
-            border-radius: 5px;
-            font-size: 12px;
-            white-space: nowrap;
-        }
-
-        .new-chat-btn svg { width: 15px; height: 15px; }
-
-        .conversation-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px;
-        }
-
-        .conversation-row {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            margin-bottom: 3px;
-        }
-
-        .conversation-select, .conversation-delete {
-            height: 38px;
-            border-radius: 5px;
-            background: transparent;
-            color: var(--text-dark);
-        }
-
-        .conversation-select {
-            min-width: 0;
-            flex: 1;
-            justify-content: flex-start;
-            padding: 0 9px;
-            overflow: hidden;
-            font-size: 12px;
-            text-align: left;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .conversation-select:hover, .conversation-select[aria-current="true"] {
-            background: var(--green-pale);
-        }
-
-        .conversation-delete {
-            width: 32px;
-            flex: 0 0 32px;
-            color: var(--text-muted);
-        }
-
-        .conversation-delete:hover { background: #f8e8e6; color: #9b342b; }
-        .conversation-delete svg { width: 15px; height: 15px; stroke: currentColor; }
-
-        .conversation-empty {
-            padding: 12px 10px;
-            color: var(--text-muted);
-            font-size: 12px;
-            line-height: 1.5;
-        }
-
-        .chat-panel {
-            min-width: 0;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .account-controls {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-left: auto;
-        }
-
-        .account-email {
-            max-width: 180px;
-            overflow: hidden;
-            color: var(--green-pale);
-            font-size: 12px;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .logout-btn, .auth-mode button, .auth-submit {
-            width: auto;
-            height: auto;
-            border-radius: 6px;
-            font: inherit;
-        }
-
-        .logout-btn {
-            padding: 8px 11px;
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            background: transparent;
-            font-size: 12px;
-        }
-
-        .logout-btn:hover { background: rgba(255, 255, 255, 0.12); }
-
-        .auth-view {
-            flex: 1;
-            display: grid;
-            place-items: center;
-            overflow-y: auto;
-            padding: 32px 24px;
-        }
-
-        .auth-content { width: 100%; max-width: 380px; }
-        .auth-eyebrow {
-            margin-bottom: 10px;
-            color: var(--green-mid);
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-        }
-
-        .auth-content h2 {
-            color: var(--green-deep);
-            font-size: 24px;
-            line-height: 1.25;
-        }
-
-        .auth-copy {
-            margin-top: 8px;
-            color: var(--text-muted);
-            font-size: 13px;
-            line-height: 1.55;
-        }
-
-        .auth-mode {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4px;
-            margin: 24px 0 18px;
-            padding: 4px;
-            border: 1px solid var(--grey-border);
-            border-radius: 7px;
-            background: var(--grey-soft);
-        }
-
-        .auth-mode button {
-            min-height: 38px;
-            padding: 8px 12px;
-            background: transparent;
-            color: var(--text-muted);
-            font-size: 13px;
-        }
-
-        .auth-mode button:hover { background: rgba(255, 255, 255, 0.7); }
-        .auth-mode button[aria-selected="true"] {
-            background: var(--white);
-            color: var(--green-deep);
-            box-shadow: 0 1px 4px rgba(26, 46, 31, 0.12);
-        }
-
-        .auth-form { display: grid; gap: 14px; }
-        .auth-form label {
-            display: grid;
-            gap: 6px;
-            color: var(--text-dark);
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .auth-form input {
-            width: 100%;
-            min-height: 43px;
-            padding: 10px 12px;
-            border: 1px solid var(--grey-border);
-            border-radius: 5px;
-            outline: none;
-            background: var(--white);
-            color: var(--text-dark);
-            font: 14px 'Inter', sans-serif;
-        }
-
-        .auth-form input:focus { border-color: var(--green-mid); }
-        .auth-form input::placeholder { color: #87978d; }
-
-        .auth-submit {
-            width: 100%;
-            min-height: 44px;
-            margin-top: 3px;
-            border-radius: 5px;
-            background: var(--green-deep);
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .auth-message {
-            min-height: 20px;
-            color: #a33232;
-            font-size: 12px;
-            line-height: 1.5;
-        }
-
-        .app.authenticated .auth-view { display: none; }
-        .app.authenticated .workspace { display: flex; }
-        .app.authenticated .chat { display: flex; }
-        .app.authenticated .input-area { display: flex; }
-        .chat, .input-area { display: none; }
-
-        @media (max-width: 520px) {
-            body { min-height: 100vh; height: auto; padding: 0; }
-            .app { min-height: 100vh; height: 100vh; border-radius: 0; }
-            .header { padding: 14px 16px; }
-            .account-controls { gap: 8px; }
-            .account-email { max-width: 90px; }
-            .auth-view { padding: 28px 22px; }
-            .workspace { flex-direction: column; }
-            .conversation-sidebar {
-                width: 100%;
-                flex: 0 0 auto;
-                border-right: 0;
-                border-bottom: 1px solid var(--grey-border);
-            }
-            .sidebar-heading { min-height: 48px; padding: 8px 12px; }
-            .conversation-list {
-                display: flex;
-                gap: 4px;
-                max-height: 54px;
-                overflow-x: auto;
-                overflow-y: hidden;
-                padding: 5px 8px;
-            }
-            .conversation-row { flex: 0 0 180px; margin: 0; }
-            .conversation-empty { padding: 7px 5px; white-space: nowrap; }
-            .chat { padding: 18px 14px; }
-            .input-area { padding: 12px; }
-        }
     </style>
 </head>
 <body>
@@ -539,311 +300,32 @@
             <p>Grade 9 · Powered by AI</p>
         </div>
         <div class="status-dot"></div>
-        <div class="account-controls" id="account-controls" hidden>
-            <span class="account-email" id="account-email"></span>
-            <button class="logout-btn" id="logout-btn" type="button">Sign out</button>
+    </div>
+
+    <div class="chat" id="chat">
+        <div class="welcome">
+            <div class="welcome-leaf">🌱</div>
+            <h2>Ready to learn</h2>
+            <p>Ask any question from your Grade 9 Biology textbook and I will explain it clearly.</p>
         </div>
     </div>
 
-    <section class="auth-view" id="auth-view" aria-labelledby="auth-title">
-        <div class="auth-content">
-            <p class="auth-eyebrow">GRADE 9 BIOLOGY</p>
-            <h2 id="auth-title">Welcome back</h2>
-            <p class="auth-copy" id="auth-copy">Sign in to continue learning with your biology tutor.</p>
-
-            <div class="auth-mode" role="tablist" aria-label="Account access">
-                <button id="login-mode" type="button" role="tab" aria-selected="true">Sign in</button>
-                <button id="register-mode" type="button" role="tab" aria-selected="false">Create account</button>
-            </div>
-
-            <form class="auth-form" id="auth-form">
-                <label id="full-name-row" hidden>
-                    Full name
-                    <input id="full-name" name="full_name" type="text" autocomplete="name" minlength="2" maxlength="100" placeholder="Your name">
-                </label>
-                <label>
-                    Email
-                    <input id="email" name="email" type="email" autocomplete="username" required placeholder="you@example.com">
-                </label>
-                <label>
-                    Password
-                    <input id="password" name="password" type="password" autocomplete="current-password" required placeholder="At least 8 characters">
-                </label>
-                <button class="auth-submit" id="auth-submit" type="submit">Sign in</button>
-                <p class="auth-message" id="auth-message" role="alert" aria-live="polite"></p>
-            </form>
-        </div>
-    </section>
-
-    <div class="workspace">
-        <aside class="conversation-sidebar" aria-label="Saved conversations">
-            <div class="sidebar-heading">
-                <h2>Conversations</h2>
-                <button class="new-chat-btn" id="new-chat-btn" type="button" title="Start a new conversation">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-                    New chat
-                </button>
-            </div>
-            <div class="conversation-list" id="conversation-list" aria-live="polite"></div>
-        </aside>
-        <main class="chat-panel">
-            <div class="chat" id="chat">
-                <div class="welcome">
-                    <div class="welcome-leaf">🌱</div>
-                    <h2>Ready to learn</h2>
-                    <p>Ask any question from your Grade 9 Biology textbook and I will explain it clearly.</p>
-                </div>
-            </div>
-            <div class="input-area">
-                <input type="text" id="input" placeholder="Ask a biology question..." autocomplete="off"/>
-                <button id="send-btn" type="button" aria-label="Send message" title="Send message">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <line x1="22" y1="2" x2="11" y2="13"/>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                    </svg>
-                </button>
-            </div>
-        </main>
+    <div class="input-area">
+        <input type="text" id="input" placeholder="Ask a biology question..." autocomplete="off"/>
+        <button id="send-btn" onclick="ask()">
+            <svg viewBox="0 0 24 24">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+        </button>
     </div>
 
 </div>
 
 <script>
-    const app = document.querySelector(".app")
     const chat    = document.getElementById("chat")
     const input   = document.getElementById("input")
     const sendBtn = document.getElementById("send-btn")
-    const authForm = document.getElementById("auth-form")
-    const authMessage = document.getElementById("auth-message")
-    const fullNameRow = document.getElementById("full-name-row")
-    const fullNameInput = document.getElementById("full-name")
-    const emailInput = document.getElementById("email")
-    const passwordInput = document.getElementById("password")
-    const authSubmit = document.getElementById("auth-submit")
-    const accountControls = document.getElementById("account-controls")
-    const accountEmail = document.getElementById("account-email")
-    const conversationList = document.getElementById("conversation-list")
-    let currentConversationId = null
-    let authMode = "login"
-
-    function saveTokens(tokens) {
-        sessionStorage.setItem("access_token", tokens.access_token)
-        sessionStorage.setItem("refresh_token", tokens.refresh_token)
-    }
-
-    function setSignedIn(signedIn, email = "") {
-        app.classList.toggle("authenticated", signedIn)
-        accountControls.hidden = !signedIn
-        accountEmail.textContent = email || "Signed in"
-        if (signedIn) {
-            input.focus()
-            loadConversations()
-        }
-    }
-
-    function setAuthMode(mode) {
-        authMode = mode
-        const registering = mode === "register"
-        fullNameRow.hidden = !registering
-        fullNameInput.required = registering
-        passwordInput.autocomplete = registering ? "new-password" : "current-password"
-        document.getElementById("login-mode").setAttribute("aria-selected", String(!registering))
-        document.getElementById("register-mode").setAttribute("aria-selected", String(registering))
-        document.getElementById("auth-title").textContent = registering ? "Create your account" : "Welcome back"
-        document.getElementById("auth-copy").textContent = registering
-            ? "Set up an account to start learning with your biology tutor."
-            : "Sign in to continue learning with your biology tutor."
-        authSubmit.textContent = registering ? "Create account" : "Sign in"
-        authMessage.textContent = ""
-    }
-
-    async function responseMessage(response) {
-        const data = await response.json().catch(() => ({}))
-        if (Array.isArray(data.detail)) {
-            return data.detail.map(item => item.msg || "Invalid input").join(" ")
-        }
-        return data.detail || data.message || `Request failed (${response.status}).`
-    }
-
-    async function refreshAccessToken() {
-        const refreshToken = sessionStorage.getItem("refresh_token")
-        if (!refreshToken) return false
-
-        try {
-            const response = await fetch("/auth/refresh", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ refresh_token: refreshToken })
-            })
-            if (!response.ok) return false
-            saveTokens(await response.json())
-            return true
-        } catch {
-            return false
-        }
-    }
-
-    async function fetchWithAuth(url, options = {}) {
-        const headers = new Headers(options.headers || {})
-        const accessToken = sessionStorage.getItem("access_token")
-        if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`)
-
-        let response = await fetch(url, { ...options, headers })
-        if (response.status === 401 && await refreshAccessToken()) {
-            headers.set("Authorization", `Bearer ${sessionStorage.getItem("access_token")}`)
-            response = await fetch(url, { ...options, headers })
-        }
-        return response
-    }
-
-    document.getElementById("login-mode").addEventListener("click", () => setAuthMode("login"))
-    document.getElementById("register-mode").addEventListener("click", () => setAuthMode("register"))
-
-    authForm.addEventListener("submit", async event => {
-        event.preventDefault()
-        authMessage.textContent = ""
-        authSubmit.disabled = true
-        authSubmit.textContent = authMode === "register" ? "Creating account..." : "Signing in..."
-
-        const credentials = {
-            email: emailInput.value.trim(),
-            password: passwordInput.value
-        }
-        if (authMode === "register") credentials.full_name = fullNameInput.value.trim()
-
-        try {
-            const response = await fetch(`/auth/${authMode === "register" ? "register" : "login"}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(credentials)
-            })
-            if (!response.ok) throw new Error(await responseMessage(response))
-
-            saveTokens(await response.json())
-            sessionStorage.setItem("account_email", credentials.email)
-            passwordInput.value = ""
-            setSignedIn(true, credentials.email)
-        } catch (error) {
-            authMessage.textContent = error.message || "Could not connect. Please try again."
-        } finally {
-            authSubmit.disabled = false
-            authSubmit.textContent = authMode === "register" ? "Create account" : "Sign in"
-        }
-    })
-
-    document.getElementById("logout-btn").addEventListener("click", async () => {
-        const refreshToken = sessionStorage.getItem("refresh_token")
-        if (refreshToken) {
-            try {
-                await fetch("/auth/logout", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ refresh_token: refreshToken })
-                })
-            } catch { /* Clear this browser session even if the server is unavailable. */ }
-        }
-        sessionStorage.removeItem("access_token")
-        sessionStorage.removeItem("refresh_token")
-        sessionStorage.removeItem("account_email")
-        currentConversationId = null
-        conversationList.replaceChildren()
-        chat.innerHTML = `<div class="welcome"><div class="welcome-leaf">🌱</div><h2>Ready to learn</h2><p>Ask any question from your Grade 9 Biology textbook and I will explain it clearly.</p></div>`
-        setSignedIn(false)
-    })
-
-    const savedAccessToken = sessionStorage.getItem("access_token")
-    if (savedAccessToken) {
-        setSignedIn(true, sessionStorage.getItem("account_email"))
-    }
-
-    function showWelcome() {
-        chat.innerHTML = `<div class="welcome"><div class="welcome-leaf">🌱</div><h2>Ready to learn</h2><p>Ask any question from your Grade 9 Biology textbook and I will explain it clearly.</p></div>`
-    }
-
-    function renderConversations(conversations) {
-        conversationList.replaceChildren()
-        if (!conversations.length) {
-            const empty = document.createElement("p")
-            empty.className = "conversation-empty"
-            empty.textContent = "Your saved conversations will appear here."
-            conversationList.appendChild(empty)
-            return
-        }
-
-        conversations.forEach(conversation => {
-            const row = document.createElement("div")
-            row.className = "conversation-row"
-
-            const select = document.createElement("button")
-            select.type = "button"
-            select.className = "conversation-select"
-            select.textContent = conversation.title || "Biology conversation"
-            select.title = select.textContent
-            select.setAttribute("aria-current", String(conversation.id === currentConversationId))
-            select.addEventListener("click", () => openConversation(conversation.id))
-
-            const remove = document.createElement("button")
-            remove.type = "button"
-            remove.className = "conversation-delete"
-            remove.title = "Delete conversation"
-            remove.setAttribute("aria-label", `Delete ${select.textContent}`)
-            remove.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"/></svg>`
-            remove.addEventListener("click", () => deleteConversation(conversation.id))
-
-            row.append(select, remove)
-            conversationList.appendChild(row)
-        })
-    }
-
-    async function loadConversations() {
-        try {
-            const response = await fetchWithAuth("/conversations")
-            if (!response.ok) throw new Error(await responseMessage(response))
-            const conversations = await response.json()
-            renderConversations(conversations)
-        } catch (error) {
-            conversationList.replaceChildren()
-            const message = document.createElement("p")
-            message.className = "conversation-empty"
-            message.textContent = error.message || "Could not load conversations."
-            conversationList.appendChild(message)
-        }
-    }
-
-    async function openConversation(conversationId) {
-        try {
-            const response = await fetchWithAuth(`/conversations/${conversationId}/messages`)
-            if (!response.ok) throw new Error(await responseMessage(response))
-            const messages = await response.json()
-            currentConversationId = conversationId
-            showWelcome()
-            messages.forEach(message => addMessage(message.content, message.role === "user" ? "user" : "bot"))
-            await loadConversations()
-        } catch (error) {
-            addMessage(error.message || "Could not load this conversation.", "bot")
-        }
-    }
-
-    async function deleteConversation(conversationId) {
-        try {
-            const response = await fetchWithAuth(`/conversations/${conversationId}`, { method: "DELETE" })
-            if (!response.ok) throw new Error(await responseMessage(response))
-            if (currentConversationId === conversationId) {
-                currentConversationId = null
-                showWelcome()
-            }
-            await loadConversations()
-        } catch (error) {
-            addMessage(error.message || "Could not delete this conversation.", "bot")
-        }
-    }
-
-    document.getElementById("new-chat-btn").addEventListener("click", () => {
-        currentConversationId = null
-        showWelcome()
-        loadConversations()
-        input.focus()
-    })
 
     function addMessage(text, role) {
         const welcome = document.querySelector(".welcome")
@@ -867,74 +349,53 @@
         return bubble
     }
 
+    function showThinking() {
+        const msg    = document.createElement("div")
+        msg.className = "message bot"
+        msg.id        = "thinking"
+
+        const avatar  = document.createElement("div")
+        avatar.className = "avatar"
+        avatar.textContent = "🌿"
+
+        const bubble  = document.createElement("div")
+        bubble.className = "thinking"
+        bubble.innerHTML = `<div class="stem"></div><div class="stem"></div><div class="stem"></div>`
+
+        msg.appendChild(avatar)
+        msg.appendChild(bubble)
+        chat.appendChild(msg)
+        chat.scrollTop = chat.scrollHeight
+    }
+
+    function removeThinking() {
+        const el = document.getElementById("thinking")
+        if (el) el.remove()
+    }
+
     async function ask() {
         const question = input.value.trim()
-        if (!question || sendBtn.disabled) return
+        if (!question) return
 
         addMessage(question, "user")
         input.value   = ""
         input.disabled = true
         sendBtn.disabled = true
 
-        const responseBubble = addMessage("Starting...", "bot")
+        showThinking()
 
         try {
-            if (currentConversationId === null) {
-                const created = await fetchWithAuth("/conversations", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ title: question.slice(0, 80) })
-                })
-                if (!created.ok) throw new Error(await responseMessage(created))
-                const conversation = await created.json()
-                currentConversationId = conversation.id
-                await loadConversations()
-            }
-
-            const res = await fetchWithAuth(`/conversations/${currentConversationId}/messages`, {
+            const res  = await fetch("/ask", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content: question })
+                body: JSON.stringify({ question })
             })
-            if (!res.ok) throw new Error(await responseMessage(res))
-            const reader = res.body.getReader()
-            const decoder = new TextDecoder()
-            let answer = ""
-
-            const processEvent = frame => {
-                let eventType = "message"
-                const dataLines = []
-                for (const line of frame.split(/\r?\n/)) {
-                    if (line.startsWith("event:")) eventType = line.slice(6).trim()
-                    if (line.startsWith("data:")) dataLines.push(line.slice(5).trim())
-                }
-                if (!dataLines.length) return
-
-                const eventData = JSON.parse(dataLines.join("\n"))
-                if (eventType === "status") {
-                    responseBubble.textContent = eventData.content
-                } else if (eventType === "token") {
-                    answer += eventData.content
-                    responseBubble.textContent = answer
-                }
-                chat.scrollTop = chat.scrollHeight
-            }
-
-            let buffer = ""
-            while (true) {
-                const { value, done } = await reader.read()
-                buffer += decoder.decode(value || new Uint8Array(), { stream: !done })
-                let frameEnd
-                while ((frameEnd = buffer.indexOf("\n\n")) !== -1) {
-                    processEvent(buffer.slice(0, frameEnd))
-                    buffer = buffer.slice(frameEnd + 2)
-                }
-                if (done) break
-            }
-            if (buffer.trim()) processEvent(buffer)
-            responseBubble.textContent = answer || "I couldn't get an answer. Please try again."
-        } catch (error) {
-            responseBubble.textContent = error.message || "Something went wrong. Please try again."
+            const data = await res.json()
+            removeThinking()
+            addMessage(data.answer, "bot")
+        } catch (err) {
+            removeThinking()
+            addMessage("Something went wrong. Please try again.", "bot")
         }
 
         input.disabled   = false
@@ -942,10 +403,9 @@
         input.focus()
     }
 
-    input.addEventListener("keydown", e => {
+    input.addEventListener("keypress", e => {
         if (e.key === "Enter") ask()
     })
-    sendBtn.addEventListener("click", ask)
 </script>
 </body>
 </html>

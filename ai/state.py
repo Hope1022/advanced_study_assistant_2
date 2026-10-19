@@ -1,7 +1,7 @@
 from typing import TypedDict
+class State(TypedDict):
+    query:str
+    context:str
+    response:str
+    is_safe:bool
 
-class AgentState(TypedDict):
-    question: str
-    history: list[dict]
-    route: str
-    response: str
