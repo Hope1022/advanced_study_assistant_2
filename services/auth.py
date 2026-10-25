@@ -25,27 +25,38 @@ async def register_user(
 ) -> TokenSchema:
 
     # check if email already exists
-    existing_user = await db.fetchrow(
-        "SELECT id FROM users WHERE email = $1", data.email
-    )
+    # existing_user = await db.fetchrow(
+    #     "SELECT id FROM users WHERE email = $1", data.email
+    # )
 
-    if existing_user:
-        raise EmailAlreadyExistsException
-
+    # if existing_user:
+    #     raise EmailAlreadyExistsException
     password_hash = hash_password(data.password)
-
+    try:
+        await db.execute(
+    """
+    INSERT INTO users (email, password_hash)
+    VALUES ($1, $2)
+    """,
+    data.email,
+    password_hash,
+)
+    except asyncpg.UniqueViolationError:
+        raise EmailAlreadyExistsException
+    new_user_id = await db.fetchval("SELECT lastval()")
+    print(f"PASSWORD-{password_hash}")
     # insert user and get the new id back
-    new_user = await db.fetchrow(
-        """
-        INSERT INTO users (email, password_hash)
-        VALUES ($1, $2)
-        RETURNING id
-        """,
-        data.email,
-        password_hash,
-    )
+    # new_user = await db.fetchrow(
+    #     """
+    #     INSERT INTO users (email, password_hash)
+    #     VALUES ($1, $2)
+    #     RETURNING id
+    #     """,
+    #     data.email,
+    #     password_hash,
+    # )
 
-    token_data = {"sub": str(new_user["id"])}
+    token_data = {"sub": str(new_user_id)}
 
     access_token  = create_access_token(token_data)
     refresh_token = create_refresh_token(token_data)
@@ -56,7 +67,7 @@ async def register_user(
         INSERT INTO sessions (user_id, refresh_token)
         VALUES ($1, $2)
         """,
-        new_user["id"],
+        new_user_id,
         refresh_token,
     )
 
@@ -72,8 +83,7 @@ async def login_user(
 ) -> TokenSchema:
 
     user = await db.fetchrow(
-        "SELECT id, password_hash, is_active FROM users WHERE email = $1",
-        data.email,
+        "SELECT * FROM get_user_for_login($1)", data.email
     )
 
     if not user:
@@ -126,14 +136,7 @@ async def refresh_access_token(
     if not verify_token_type(payload, "refresh"):
         raise TokenTypeMismatchException
 
-    session = await db.fetchrow(
-        """
-        SELECT id FROM sessions
-        WHERE refresh_token = $1
-        AND is_revoked = FALSE
-        """,
-        refresh_token,
-    )
+    session = await db.fetchrow("SELECT * FROM get_valid_session($1)", refresh_token)
 
     if not session:
         raise InvalidTokenException
@@ -150,11 +153,4 @@ async def logout_user(
     db: asyncpg.Connection,
 ) -> None:
 
-    await db.execute(
-        """
-        UPDATE sessions
-        SET is_revoked = TRUE
-        WHERE refresh_token = $1
-        """,
-        refresh_token,
-    )
+    await db.execute("SELECT revoke_session($1)", refresh_token)

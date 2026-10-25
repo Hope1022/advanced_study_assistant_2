@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.responses import StreamingResponse
 import asyncpg
 
-from database.database import get_db
+from database.database import get_db, get_authenticated_db
 from schemas.ai import (
     ConversationCreateSchema,
     ConversationResponseSchema,
@@ -26,7 +26,7 @@ router = APIRouter(
 async def create_conversation(
     data: ConversationCreateSchema,
     user_id: int = Depends(get_current_user),
-    db: asyncpg.Connection = Depends(get_db),
+    db: asyncpg.Connection = Depends(get_authenticated_db),
 ):
     return await conversation_service.create_conversation(
         user_id=user_id,
@@ -42,7 +42,7 @@ async def create_conversation(
 )
 async def get_conversations(
     user_id: int = Depends(get_current_user),
-    db: asyncpg.Connection = Depends(get_db),
+    db: asyncpg.Connection = Depends(get_authenticated_db),
 ):
     return await conversation_service.get_conversations(
         user_id=user_id,
@@ -57,7 +57,7 @@ async def get_conversations(
 async def delete_conversation(
     conversation_id: int,
     user_id: int = Depends(get_current_user),
-    db: asyncpg.Connection = Depends(get_db),
+    db: asyncpg.Connection = Depends(get_authenticated_db),
 ):
     deleted = await conversation_service.delete_conversation(
         conversation_id=conversation_id,
@@ -82,7 +82,7 @@ async def delete_conversation(
 async def get_messages(
     conversation_id: int,
     user_id: int = Depends(get_current_user),
-    db: asyncpg.Connection = Depends(get_db),
+    db: asyncpg.Connection = Depends(get_authenticated_db),
 ):
     messages = await conversation_service.get_messages(
         conversation_id=conversation_id,
@@ -107,7 +107,7 @@ async def create_message(
     conversation_id: int,
     data: MessageCreateSchema,
     user_id: int = Depends(get_current_user),
-    db: asyncpg.Connection = Depends(get_db),
+    db: asyncpg.Connection = Depends(get_authenticated_db),
 ):
     message = await conversation_service.create_message(
         conversation_id=conversation_id,
