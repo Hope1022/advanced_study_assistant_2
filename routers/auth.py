@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 import asyncpg
  
-from database.database import get_db
+from database.database import get_db, get_authenticated_db
 from schemas.user import UserRegisterSchema, UserLoginSchema
 from schemas.token import TokenSchema, RefreshTokenSchema
 from services import auth

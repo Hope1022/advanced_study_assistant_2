@@ -4,6 +4,9 @@ from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
+from langchain_groq import ChatGroq
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
 # from langchain_community.embeddings import OllamaEmbeddings
 import os
 from langchain_ollama import OllamaEmbeddings
@@ -17,24 +20,28 @@ sys.path.insert(0, r"D:\AI engineering\AI_FOR_RURAL\G_9 biology")
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
 # reranker   = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
 ranker = Ranker(model_name="ms-marco-MiniLM-L-12-v2")
-
+def chunk_splitter():
+   pages = []
+   with pdfplumber.open("books/Biology_9.pdf") as pdf:
+           for i, page in enumerate(pdf.pages):
+               text = page.extract_text()
+               if text and text.strip():
+                   pages.append(Document(
+                       page_content=text,
+                       metadata={"page": i + 1, "type": "text"}
+                   ))
+   
+   splitter = RecursiveCharacterTextSplitter(
+           chunk_size=1000,
+           chunk_overlap=100
+       ) 
+   text_docs = splitter.split_documents(pages)
+   return text_docs
+    
 if not os.path.exists("./biology_db") or not os.listdir("./biology_db"):
 
-    pages = []
-    with pdfplumber.open("books/Biology_9.pdf") as pdf:
-        for i, page in enumerate(pdf.pages):
-            text = page.extract_text()
-            if text and text.strip():
-                pages.append(Document(
-                    page_content=text,
-                    metadata={"page": i + 1, "type": "text"}
-                ))
-
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=100
-    )
-    text_docs = splitter.split_documents(pages)
+    
+    text_docs = chunk_splitter()
 
     with open("chart_annotations.json") as f:
         charts = json.load(f)
@@ -74,11 +81,59 @@ else:
     )
     print(f"Loaded. {db._collection.count()} chunks.")
 
-def retrieve(query: str):
 
-    retriever = db.as_retriever(search_kwargs={"k": 20})
-    top20     = retriever.invoke(query)
+    
+from langchain_classic.retrievers import EnsembleRetriever
+from langchain_classic.retrievers import BM25Retriever
 
+bm25_retriever = BM25Retriever.from_documents(chunk_splitter())
+bm25_retriever.k = 7
+vector_retriever = db.as_retriever(search_kwargs={"k": 7})
+#print(bm25_retriever.invoke("what is osmosis and diffusion"))
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
+groq_api_key = os.getenv("groq_api_key")
+llm = ChatGroq(api_key=groq_api_key,
+               model="openai/gpt-oss-20b", temperature=0)
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "Rewrite the user query into 3 specific sub-queries for document retrieval. Return only a numbered list, nothing else."),
+    ("human", "{query}")
+])
+def sub_querries(query: str):
+    
+        chain = prompt | llm | StrOutputParser()
+        result = chain.invoke({"query": query})
+        #print(result)
+        lines = [line.strip() for line in result.strip().split("\n") if line.strip()]
+        sub_queries = [line.split(". ", 1)[-1] for line in lines if line[0].isdigit()]
+        return sub_queries
+def transform_and_retrieve(sub_querie_) -> list:
+    sub_queries = sub_querries(sub_querie_)
+    ensemble_retriever = EnsembleRetriever(
+    retrievers=[bm25_retriever, vector_retriever],
+    weights=[0.5, 0.5]
+)
+    all_chunks = []
+    for sub_query in sub_queries:
+        chunks = ensemble_retriever.invoke(sub_query)  # returns ~7 chunks
+        all_chunks.extend(chunks)
+    
+    
+    seen = set()
+    unique_chunks = []
+    for chunk in all_chunks:
+        if chunk.page_content not in seen:
+            seen.add(chunk.page_content)
+            unique_chunks.append(chunk)
+    
+    return unique_chunks  # ~20 chunks → ready for reranking
+
+
+def reranked(query, top20):
+    
     passages  = [{"id": i, "text": doc.page_content, "meta": doc.metadata} for i, doc in enumerate(top20)]
     request   = RerankRequest(query=query, passages=passages)
     reranked  = ranker.rerank(request)[:5]
@@ -95,6 +150,21 @@ def retrieve(query: str):
     for r in results:
         context += r["text"] + "\n\n"
     return context
-    
+def final_chunk(query):
+  top20 = transform_and_retrieve(query)
+  reranked_result= reranked(query, top20)
+  return reranked_result 
+# query = "this osmosis thing and diffusion is complicated what even is it?"
+# results = transform_and_retrieve(query)
+# reranked_result = reranked(results)
 
+#print(results)
+# print(reranked_result)
+# print(len(reranked_result))
+# from langsmith import Client
+# os.environ["LANGSMITH_TRACING"] = "true"
+# os.environ["LANGSMITH_API_KEY"] = os.getenv("LANGSMITH_API_KEY", "")
+# os.environ["LANGSMITH_PROJECT"] = os.getenv("LANGSMITH_PROJECT", "")
 
+# client = Client()
+# print("Connected:", client.list_projects())
